@@ -1,4 +1,6 @@
 #!/bin/bash
-# Launch Fresh, open the left tree panel, split the workspace vertically for btm,
-# then split that right pane horizontally to run tig underneath it.
-fresh . --cmd="split-vertical" --cmd="run btm" --cmd="split-horizontal" --cmd="run tig"
+# Move straight to the project repository folder first
+cd ~/Bobot_3 || exit
+
+# Fire up fresh under the persistent "bobot" workspace attached to this current directory
+fresh -a bobot .
