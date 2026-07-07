@@ -1,0 +1,4 @@
+# SKiDL generated files
+*.net
+*.erc
+*_sklib.py
