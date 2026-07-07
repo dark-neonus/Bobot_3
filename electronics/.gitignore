@@ -2,3 +2,12 @@
 *.net
 *.erc
 *_sklib.py
+*.json
+*.dot
+*.rpt
+*.lck
+*.svg
+*.kicad_sch
+fp-lib-table
+
+node_modules

@@ -1,32 +1,32 @@
-from skidl.pyspice import *
+from skidl import *
 
-# 1. Define your circuit networks
-vcc = Net("VCC")
+# Reset the circuit engine
+default_circuit.reset()
+
+# Create templates pointing directly to KiCad's official graphical symbols
+q = Part(
+    "Transistor_BJT",
+    "Q_PNP_CBE",
+    footprint="Package_TO_SOT_THT:TO-92_Inline",
+    dest=TEMPLATE,
+)
+r = Part("Device", "R", footprint="Resistor_SMD:R_0805_2012Metric", dest=TEMPLATE)
+
+# Create nets
+gnd, vcc = Net("GND"), Net("VCC")
 a, b, a_and_b = Net("A"), Net("B"), Net("A_AND_B")
 
-# 2. Instantiate your components
-q1 = Q(ref="Q1")
-q2 = Q(ref="Q2")
+# Instantiate parts
+q1, q2 = q(2)
+r1, r2, r3, r4, r5 = r(5, value="10K")
 
-r1 = R(ref="R1", value="10k")
-r2 = R(ref="R2", value="10k")
-r3 = R(ref="R3", value="10k")
-r4 = R(ref="R4", value="10k")
-r5 = R(ref="R5", value="10k")
+# Build the connections
+a & r1 & q1[2, 1] & r4 & q2[2, 1] & a_and_b & r5 & gnd
+b & r2 & q1[2]
+q1[1] & r3 & gnd
+vcc += q1[3], q2[3]
 
-# 3. Map the network topology
-a & r1 & q1["b"]
-b & r2 & q1["b"]
-vcc & r3 & q1["c"] & r4 & q2["b"]
-vcc & r5 & q2["c"] & a_and_b
-gnd += q1["e"], q2["e"]
-
-# 4. Export clean SPICE Netlist string
-print("\n--- GENERATED SPICE NETLIST ---")
-print(generate_netlist())
-
-# 5. 🎨 VISUALIZATION BUG FIX / ENHANCEMENT
-# Generate a schematic graph representation entirely without KiCad.
-# This outputs 'pyspice.dot' and compiles it into 'pyspice.png'
-print("\n--- GENERATING ELECTRICAL SCHEME GRAPH ---")
-default_circuit.generate_graph(file_="circuit_graph.dot")
+# 📄 THIS IS THE KEY: Generate a native KiCad schematic file instead of a netlist
+# This will output a file named 'circuit_board.kicad_sch'
+generate_schematic(file_="circuit_board.kicad_sch")
+print("🎉 Clean KiCad schematic database generated!")
