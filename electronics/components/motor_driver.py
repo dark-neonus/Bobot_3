@@ -9,6 +9,6 @@ Motor_Driver = Part(
     price_uah="193.5",
     buy_link="https://prom.ua/ua/m-8558366577709891752-drajver-motorov-odnokanalnyj.html",
     # Driver specs
-    i_limit_amp=43.0,
     v_in_range=[6.0, 27.0],
+    i_max_in_amp=43.0,
 )
