@@ -9,5 +9,6 @@
 *.svg
 *.kicad_sch
 fp-lib-table
+*.bak
 
 node_modules
