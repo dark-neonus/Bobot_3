@@ -19,4 +19,6 @@ DC_Motor = Part(
     # Electrical specs
     v_in_range=[6.0, 24.0],
     i_max_in_amp=3.8,
+    # Physical specs
+    weight_g=300,
 )
