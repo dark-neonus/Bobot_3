@@ -3,7 +3,6 @@ from skidl import TEMPLATE, Part
 DC_Motor = Part(
     "Motor",
     "Motor_DC",
-    ref="M",
     dest=TEMPLATE,
     value="JGB37-545 (12V)",
     # Part source
