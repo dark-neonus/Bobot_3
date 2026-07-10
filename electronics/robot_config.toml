@@ -1,0 +1,5 @@
+# Bobot 3 Robot Configuration
+
+[battery]
+cells_in_series = 4
+cells_in_parallel = 4
