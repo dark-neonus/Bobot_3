@@ -1,7 +1,12 @@
+from this import s
+
 from components.battery import Battery_Cell
-from components.fuse import Fuse_10A
+# from components.fuse import Fuse_10A
 from components.motor import DC_Motor
 from components.motor_driver import Motor_Driver
+from components.bms import BMS_4S_40A
+from components.pd_trigger import PD_Trigger_20V
+from components.step_down_converter import Step_Down_XL4015_CCCV
 from skidl import Net, Group
 from config_loader import load_config
 
@@ -57,6 +62,14 @@ def build_robot_circuit():
     gnd = Net("GND")
     vbat_raw = Net("VBAT_RAW")
     vbat_fused = Net("VBAT_FUSED")
+
+    sys_gnd = Net("SYS_GND")
+    sys_pwr = Net("SYS_16V_PWR")
+
+    # Domain C: USB CHARGING (20V)
+    usb_vbus = Net("20V_USB_VBUS")
+    usb_gnd = Net("USB_GND")
+
     v_5v = Net("5V_LOGIC")  # 5V logic supply for BTS7960 and microcontrollers
 
     # 2. Build the battery pack
@@ -68,11 +81,35 @@ def build_robot_circuit():
     mot_L = DC_Motor(ref="M1")
     mot_R = DC_Motor(ref="M2")
 
-    batt["pos"] += drv_L["B+"]
-    batt["neg"] += drv_L["B-"]
+    bms = BMS_4S_40A(ref="BMS")
+    pd_trigger = PD_Trigger_20V(ref="PD_TRIGGER")
+    step_down = Step_Down_XL4015_CCCV(ref="STEP_DOWN")
 
-    batt["pos"] += drv_R["B+"]
-    batt["neg"] += drv_R["B-"]
+    bms["B+"] += vbat_fused
+    bms["B-"] += gnd
+
+    # Connect the balance wires exactly to the intermediate nodes (3 taps for 4S)
+    bms["B1"] += batt["balance_taps"][0]
+    bms["B2"] += batt["balance_taps"][1]
+    bms["B3"] += batt["balance_taps"][2]
+
+    # The BMS acts as the gateway. P+ and P- become our new master power rails!
+    bms["P+"] += sys_pwr
+    bms["P-"] += sys_gnd
+
+    pd_trigger["USB_IN"] += usb_vbus
+    pd_trigger["GND_IN"] += usb_gnd
+
+    step_down["IN+"] += pd_trigger["VBUS"]
+    step_down["IN-"] += pd_trigger["GND"]
+    step_down["OUT+"] += bms["P+"]
+    step_down["OUT-"] += bms["P-"]
+
+    drv_L["B+"] += sys_pwr
+    drv_L["B-"] += sys_gnd
+
+    drv_R["B+"] += sys_pwr
+    drv_R["B-"] += sys_gnd
 
     drv_L["M+"] += mot_L["+"]
     drv_L["M-"] += mot_L["-"]
