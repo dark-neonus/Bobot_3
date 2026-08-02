@@ -1,51 +1,25 @@
 from skidl import TEMPLATE, Part
 
-Fuse_5A_Automotive = None
-Fuse_10A_Automotive = None
-Fuse_30A_Automotive = None
+def _create_fuse_template(value: str, current_limit: float):
+    """Helper function to create a SKiDL template Part for fuses."""
+    return Part(
+        "Device",
+        "Fuse",
+        dest=TEMPLATE,
+        value=value,
+        # Part source
+        price_uah=0.00,
+        buy_link="-1",
+        footprint="Fuse:Fuse_Blade_Mini_SMD",
+        # Electrical specs
+        v_in_range=[0.0, 32.0],
+        i_max_in_amp=float(current_limit),
+        # Physical specs
+        weight_g=-1,
+    )
 
-automotive_fuses = [
-    (Fuse_5A_Automotive, 5),
-    (Fuse_10A_Automotive, 10),
-    (Fuse_30A_Automotive, 30),
-]
+Fuse_5A_Automotive = _create_fuse_template("Fuse 5A Automotive", 5.0)
+Fuse_10A_Automotive = _create_fuse_template("Fuse 10A Automotive", 10.0)
+Fuse_30A_Automotive = _create_fuse_template("Fuse 30A Automotive", 30.0)
 
-for fuse, current_limit in automotive_fuses:
-    fuse = Part(
-    "Device",
-    "Fuse",
-    dest=TEMPLATE,
-    value=f"Fuse {current_limit}A Automotive Mini Blade", #
-    # Part source
-    price_uah=0.00,
-    buy_link="-1",
-    footprint="Fuse:Fuse_Blade_Mini_SMD",
-    # Electrical specs
-    v_in_range=[0.0, 32.0],
-    i_max_in_amp=float(current_limit), # Need to be specified
-    # Physical specs
-    weight_g=-1,# Need to be specified
-)
-
-Fuse_2A_Fast = None
-
-fast_fuses = [
-    (Fuse_2A_Fast, 2),
-]
-
-for fuse, current_limit in fast_fuses:
-    fuse = Part(
-    "Device",
-    "Fuse",
-    dest=TEMPLATE,
-    value=f"Fuse {current_limit}A Fast",
-    # Part source
-    price_uah=0.00,
-    buy_link="-1",
-    footprint="Fuse:Fuse_Blade_Mini_SMD",
-    # Electrical specs
-    v_in_range=[0.0, 32.0],
-    i_max_in_amp=float(current_limit), # Need to be specified
-    # Physical specs
-    weight_g=-1,# Need to be specified
-)
+Fuse_2A_Fast = _create_fuse_template("Fuse 2A Fast", 2.0)

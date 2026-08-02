@@ -6,8 +6,8 @@ Step_Down_XL4015_CCCV = Part(
     dest=TEMPLATE,
     value="XL4015 5A CC/CV Buck Converter with Display",
     # Part source
-    price_uah=264.60,
-    buy_link="https://prom.ua/ua/p691700190-modul-dcdc-xl4015.html",
+    price_uah=249.99,
+    buy_link="https://prom.ua/ua/p554802084-cccv-stabilizator-ponizhayuschij.html",
     # Electrical specs
     v_in_range=[8.0, 35.0],
     v_out_range=[1.25, 32.0],
