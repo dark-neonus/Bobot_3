@@ -23,3 +23,4 @@ Fuse_10A_Automotive = _create_fuse_template("Fuse 10A Automotive", 10.0)
 Fuse_30A_Automotive = _create_fuse_template("Fuse 30A Automotive", 30.0)
 
 Fuse_2A_Fast = _create_fuse_template("Fuse 2A Fast", 2.0)
+Fuse_3A_Fast = _create_fuse_template("Fuse 3A Fast", 3.0)

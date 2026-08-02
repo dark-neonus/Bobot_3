@@ -1,11 +1,11 @@
 from components.battery import Battery_4S4P_20Ah
 from components.circuit_breaker import Circuit_Breaker
-from components.fuse import Fuse_5A_Automotive, Fuse_10A_Automotive, Fuse_30A_Automotive, Fuse_2A_Fast
+from components.fuse import Fuse_5A_Automotive, Fuse_10A_Automotive, Fuse_30A_Automotive, Fuse_2A_Fast, Fuse_3A_Fast
 from components.motor import DC_Motor
 from components.motor_driver import Motor_Driver
 from components.bms import BMS_4S_40A
 from components.pd_trigger import PD_Trigger_20V
-from components.step_down_converter import Step_Down_XL4015_CCCV
+from components.step_down_converter import Mini560_PRO_3V3, Mini560_PRO_5V, Step_Down_XL4015_CCCV
 from skidl import Net, Group
 from config_loader import load_config
 
@@ -24,7 +24,14 @@ class RobotCircuit:
         self.usb_vbus = Net("20V_USB_VBUS")
         self.usb_gnd = Net("USB_GND")
 
-        self.v_5v = Net("5V_LOGIC")  # 5V logic supply for BTS7960 and microcontrollers
+        self.rp_5V_supply = Net("RP_5V_SUPPLY")
+        self.rp_gnd_supply = Net("RP_GND_SUPPLY")
+
+        self.ps_3v3_1_supply = Net("PS_3V3_1_SUPPLY")
+        self.ps_3v3_gnd_1_supply = Net("PS_GND_1_SUPPLY")
+
+        self.ps_5v_1_supply = Net("PS_5V_1_SUPPLY")
+        self.ps_5v_gnd_1_supply = Net("PS_5V_GND_1_SUPPLY")
 
     def build_battery_subsystem(self):
         """Constructs battery pack, main fuse, BMS protection, and master power switch."""
@@ -57,28 +64,23 @@ class RobotCircuit:
         """Constructs USB-C PD trigger and step-down charging path."""
         with Group("Charging_Subsystem"):
             self.pd_trigger = PD_Trigger_20V(ref="PD_TRIGGER")
-            self.step_down = Step_Down_XL4015_CCCV(ref="STEP_DOWN")
+            self.charging_step_down = Step_Down_XL4015_CCCV(ref="STEP_DOWN")
 
             # USB Input connection
             self.pd_trigger["USB_IN"] += self.usb_vbus
             self.pd_trigger["GND_IN"] += self.usb_gnd
 
             # Step Down connection to BMS P+ / P-
-            self.step_down["IN+"] += self.pd_trigger["VBUS"]
-            self.step_down["IN-"] += self.pd_trigger["GND"]
-            self.step_down["OUT+"] += self.bms["P+"]
-            self.step_down["OUT-"] += self.bms["P-"]
+            self.charging_step_down["IN+"] += self.pd_trigger["VBUS"]
+            self.charging_step_down["IN-"] += self.pd_trigger["GND"]
+            self.charging_step_down["OUT+"] += self.bms["P+"]
+            self.charging_step_down["OUT-"] += self.bms["P-"]
 
     def build_drive_subsystem(self):
         """Constructs motor drivers, fuses, and DC drive motors."""
         with Group("Drive_Subsystem"):
             self.driver_L = Motor_Driver(ref="MOD1")
             self.driver_R = Motor_Driver(ref="MOD2")
-
-            self.motor_FR = DC_Motor(ref="M1")
-            self.motor_FL = DC_Motor(ref="M2")
-            self.motor_BR = DC_Motor(ref="M3")
-            self.motor_BL = DC_Motor(ref="M4")
 
             self.driver_L_fuse = Fuse_10A_Automotive()
             self.driver_R_fuse = Fuse_10A_Automotive()
@@ -94,6 +96,11 @@ class RobotCircuit:
             self.driver_L["GND"] += self.gnd
             self.driver_R["GND"] += self.gnd
 
+            self.motor_FR = DC_Motor(ref="M1")
+            self.motor_FL = DC_Motor(ref="M2")
+            self.motor_BR = DC_Motor(ref="M3")
+            self.motor_BL = DC_Motor(ref="M4")
+
             # Motor connections
             self.driver_L["M+"] += self.motor_FL["+"]
             self.driver_L["M-"] += self.motor_FL["-"]
@@ -105,11 +112,44 @@ class RobotCircuit:
             self.driver_R["M+"] += self.motor_FR["+"]
             self.driver_R["M-"] += self.motor_FR["-"]
 
+    def build_voltage_regulation_subsystem(self):
+        """Constructs voltage regulation subsystem for modules."""
+        with Group("Voltage_Regulation_Subsystem"):
+            with Group("Raspberry_Pi_Power_Supply"):
+                self.rp_fuse = Fuse_2A_Fast(ref="RP_FUSE")
+                self.rp_step_down = Mini560_PRO_5V(ref="RP_STEP_DOWN")
+                self.rp_fuse[1] += self.sys_pwr
+                self.rp_step_down["VIN"] += self.rp_fuse[2]
+                self.rp_step_down["IGND"] += self.gnd
+                self.rp_5V_supply += self.rp_step_down["5V"]
+                self.rp_gnd_supply += self.rp_step_down["OGND"]
+            with Group("Electronics_3V3_Power_Supply_1"):
+                self.ps_3v3_1_fuse = Fuse_2A_Fast(ref="PS_3V3_1_FUSE")
+                self.ps_3v3_1_step_down = Mini560_PRO_3V3(ref="PS_3V3_1_STEP_DOWN")
+                self.ps_3v3_1_fuse[1] += self.sys_pwr
+                self.ps_3v3_1_step_down["VIN"] += self.ps_3v3_1_fuse[2]
+                self.ps_3v3_1_step_down["IGND"] += self.gnd
+                self.ps_3v3_1_supply += self.ps_3v3_1_step_down["3.3V"]
+                self.ps_3v3_gnd_1_supply += self.ps_3v3_1_step_down["OGND"]
+
+            with Group("Electronics_5V_Power_Supply_1"):
+                self.ps_5v_1_fuse = Fuse_3A_Fast(ref="PS_5V_1_FUSE")
+                self.ps_5v_1_step_down = Mini560_PRO_5V(ref="PS_5V_1_STEP_DOWN")
+                self.ps_5v_1_fuse[1] += self.sys_pwr
+                self.ps_5v_1_step_down["VIN"] += self.ps_5v_1_fuse[2]
+                self.ps_5v_1_step_down["IGND"] += self.gnd
+                self.ps_5v_1_supply += self.ps_5v_1_step_down["5V"]
+                self.ps_5v_gnd_1_supply += self.ps_5v_1_step_down["OGND"]
+
+            with Group("Servo_Power_Supply"):
+                pass
+
     def build(self):
         """Executes full circuit assembly."""
         self.build_battery_subsystem()
         self.build_charging_subsystem()
         self.build_drive_subsystem()
+        self.build_voltage_regulation_subsystem()
         return self
 
 
