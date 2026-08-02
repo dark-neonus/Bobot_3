@@ -1,4 +1,6 @@
 from skidl import TEMPLATE, Part
+from skidl import PowerSpec, VoltageSpec, CurrentSpec, DeviceType
+
 
 def _create_fuse_template(value: str, current_limit: float):
     """Helper function to create a SKiDL template Part for fuses."""
@@ -12,8 +14,7 @@ def _create_fuse_template(value: str, current_limit: float):
         buy_link="-1",
         footprint="Fuse:Fuse_Blade_Mini_SMD",
         # Electrical specs
-        v_in_range=[0.0, 32.0],
-        i_max_in_amp=float(current_limit),
+        power_specs=PowerSpec(VoltageSpec(0.0, 32.0), CurrentSpec(float(current_limit*0.9), float(current_limit), DeviceType.CONDUCTOR)),
         # Physical specs
         weight_g=-1,
     )

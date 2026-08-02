@@ -1,4 +1,5 @@
 from skidl import Part, TEMPLATE
+from power_specs import PowerSpec, VoltageSpec, CurrentSpec, DeviceType
 
 Battery_4S4P_20Ah = Part(
     "Bobot_Custom_Library",
@@ -10,9 +11,8 @@ Battery_4S4P_20Ah = Part(
     buy_link="https://prom.ua/ua/m7985862593714244078-akumulyator-eve-inr.html",
     # Battery specs
     capacity_mah=4*5000,
-    # Electrical specs
-    v_out_range=[4*3.6, 4*4.2],
-    i_max_out_amp=4*15.0,
+    # Power specs
+    power_specs=PowerSpec(VoltageSpec(4*3.0, 4*3.6, 4*4.2), CurrentSpec(4*5.0, 4*15.0, DeviceType.SUPPLY)),
     # Physical specs
     weight_g=4*4*69
 )

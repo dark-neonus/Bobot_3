@@ -1,4 +1,5 @@
 from skidl import TEMPLATE, Part
+from power_specs import PowerSpec, VoltageSpec, CurrentSpec, DeviceType
 
 DC_Motor = Part(
     "Motor",
@@ -11,13 +12,9 @@ DC_Motor = Part(
     # Motor specs
     torque_kg_cm=5,
     no_load_rpm=330,
-    no_load_i_amp=0.2,
     load_rpm=280,
-    load_i_amp=1,
-    stall_i_amp=3.8,
     # Electrical specs
-    v_in_range=[6.0, 24.0],
-    i_max_in_amp=3.8,
+    power_specs=PowerSpec(VoltageSpec(6.0, 12.0, 24.0), CurrentSpec(1.2, 3.8, DeviceType.CONSUMER)),
     # Physical specs
     weight_g=300,
 )

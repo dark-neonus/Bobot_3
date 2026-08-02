@@ -1,4 +1,5 @@
 from skidl import TEMPLATE, Part
+from power_specs import PowerSpec, VoltageSpec, CurrentSpec, DeviceType
 
 Motor_Driver = Part(
     "Bobot_Custom_Library",
@@ -8,9 +9,8 @@ Motor_Driver = Part(
     # Part source
     price_uah="231.8",
     buy_link="https://prom.ua/ua/p1530387483-bts7960-drajver-kollektornogo.html",
-    # Driver specs
-    v_in_range=[6.0, 27.0],
-    i_max_in_amp=43.0,
+    # Electrical specs
+    power_specs=PowerSpec(VoltageSpec(6.0, 14.6, 27.0), CurrentSpec(10.0, 43.0, DeviceType.CONDUCTOR)),
     # Physical specs
     weight_g=80,
 )
